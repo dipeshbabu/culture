@@ -18,9 +18,13 @@ The app works without an API key by using deterministic demo fallbacks for the b
 Copy `.env.example` to `.env` and set:
 
 ```text
-OPENAI_API_KEY=your_key_here
-OPENAI_MODEL=gpt-4o-mini
+PORTKEY_API_KEY=your_key_here
+PORTKEY_BASE_URL=https://ai-gateway.apps.cloud.rt.nyu.edu/v1
+PORTKEY_MODEL=@vertexai/gemini-3.5-flash
+PORTKEY_MAX_TOKENS=2048
 ```
+
+When these values are present, the app calls Gemini through Portkey. If the gateway is unavailable or returns malformed JSON, the app falls back to the deterministic demo responses so the hackathon demo still works.
 
 ## Demo flow
 

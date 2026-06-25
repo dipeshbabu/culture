@@ -54,6 +54,19 @@ def clean_concept(concept: str) -> str:
     return concept.strip() or EXAMPLES[0]
 
 
+def parse_json_response(content: str) -> Dict[str, str]:
+    cleaned = content.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.removeprefix("```json").removeprefix("```").strip()
+        cleaned = cleaned.removesuffix("```").strip()
+
+    parsed = json.loads(cleaned)
+    missing = [key for key, _ in FIELDS if key not in parsed]
+    if missing:
+        raise ValueError(f"LLM response was missing expected fields: {', '.join(missing)}")
+    return {key: str(parsed[key]).strip() for key, _ in FIELDS}
+
+
 def fallback_response(concept: str, background: str, audience: str, tone: str) -> Dict[str, str]:
     query = concept.lower()
     context = f"for {audience.strip() or 'someone from a different background'}"
@@ -117,14 +130,19 @@ def fallback_response(concept: str, background: str, audience: str, tone: str) -
 
 
 def call_llm(concept: str, background: str, audience: str, tone: str) -> Dict[str, str]:
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("PORTKEY_API_KEY")
     if not api_key:
         return fallback_response(concept, background, audience, tone)
 
     try:
-        from openai import OpenAI
+        from portkey_ai import Portkey
 
-        client = OpenAI(api_key=api_key)
+        client = Portkey(
+            base_url=os.getenv(
+                "PORTKEY_BASE_URL", "https://ai-gateway.apps.cloud.rt.nyu.edu/v1"
+            ),
+            api_key=api_key,
+        )
         user_prompt = f"""Cultural phrase or concept: {concept}
 User background: {background}
 Target audience: {audience}
@@ -133,24 +151,21 @@ Tone: {tone}
 Explain this concept to the target audience."""
 
         response = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            model=os.getenv("PORTKEY_MODEL", "@vertexai/gemini-3.5-flash"),
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
-            response_format={"type": "json_object"},
+            max_tokens=int(os.getenv("PORTKEY_MAX_TOKENS", "2048")),
             temperature=0.7,
         )
         content = response.choices[0].message.content or "{}"
-        parsed = json.loads(content)
-        if not all(key in parsed for key, _ in FIELDS):
-            raise ValueError("LLM response was missing expected fields.")
-        return {key: str(parsed[key]).strip() for key, _ in FIELDS}
+        return parse_json_response(content)
     except Exception as exc:
         st.warning(
-            "The live model response was unavailable or malformed, so the app used the reliable demo fallback."
+            "The Gemini response was unavailable or malformed, so the app used the reliable demo fallback."
         )
-        st.caption(f"Fallback reason: {exc}")
+        st.caption(f"Fallback reason: {exc.__class__.__name__}")
         return fallback_response(concept, background, audience, tone)
 
 
