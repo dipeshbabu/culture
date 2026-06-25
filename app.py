@@ -187,6 +187,17 @@ def inject_styles() -> None:
             color: var(--ink);
         }
 
+        header[data-testid="stHeader"] {
+            background: transparent;
+        }
+
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        #MainMenu,
+        footer {
+            visibility: hidden;
+        }
+
         .block-container {
             max-width: 1080px;
             padding-top: 2.8rem;
@@ -215,22 +226,65 @@ def inject_styles() -> None:
             margin-bottom: 1.35rem;
         }
 
+        label,
+        div[data-testid="stTextArea"] label p,
+        div[data-testid="stTextInput"] label p,
+        div[data-testid="stSelectbox"] label p {
+            color: var(--ink) !important;
+        }
+
         div[data-testid="stTextArea"] textarea,
         div[data-testid="stTextInput"] input {
             border-radius: 8px;
             border-color: var(--line);
             background: var(--surface);
+            color: var(--ink);
+        }
+
+        div[data-testid="stTextArea"] textarea::placeholder,
+        div[data-testid="stTextInput"] input::placeholder {
+            color: var(--muted);
+            opacity: 0.75;
+        }
+
+        div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
+            background: var(--surface);
+            border-color: var(--line);
+            color: var(--ink);
+        }
+
+        div[data-testid="stSelectbox"] [data-baseweb="select"] span {
+            color: var(--ink);
         }
 
         div[data-testid="stButton"] button {
+            background: var(--card);
             border-radius: 8px;
             border: 1px solid rgba(184, 92, 56, 0.25);
+            color: var(--ink);
             font-weight: 700;
+        }
+
+        div[data-testid="stButton"] button:hover {
+            background: var(--surface);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        div[data-testid="stButton"] button p,
+        div[data-testid="stButton"] button span {
+            color: inherit;
         }
 
         div[data-testid="stButton"] button[kind="primary"] {
             background: var(--accent);
             border-color: var(--accent);
+            color: #fff;
+        }
+
+        div[data-testid="stButton"] button[kind="primary"]:hover {
+            background: #9f4e2f;
+            border-color: #9f4e2f;
             color: #fff;
         }
 
