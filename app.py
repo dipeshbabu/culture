@@ -151,7 +151,9 @@ Tone: {tone}
 Explain this concept to the target audience."""
 
         response = client.chat.completions.create(
-            model=os.getenv("PORTKEY_MODEL", "@vertexai/gemini-3.5-flash"),
+            model=os.getenv(
+                "PORTKEY_MODEL", "@vertexai/anthropic.claude-opus-4-6"
+            ),
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
@@ -163,7 +165,7 @@ Explain this concept to the target audience."""
         return parse_json_response(content)
     except Exception as exc:
         st.warning(
-            "The Gemini response was unavailable or malformed, so the app used the reliable demo fallback."
+            "The live model response was unavailable or malformed, so the app used the reliable demo fallback."
         )
         st.caption(f"Fallback reason: {exc.__class__.__name__}")
         return fallback_response(concept, background, audience, tone)
