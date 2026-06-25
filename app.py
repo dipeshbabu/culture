@@ -13,6 +13,7 @@ except ImportError:  # pragma: no cover - dependency may be absent in fallback d
 
 APP_TITLE = "Culture Remix Translator"
 TAGLINE = "Most translation apps translate words. This translates context."
+DEFAULT_PORTKEY_MODEL = "@vertexai/anthropic.claude-opus-4-6"
 
 FIELDS = [
     ("literal_meaning", "Literal meaning"),
@@ -132,6 +133,7 @@ def fallback_response(concept: str, background: str, audience: str, tone: str) -
 def call_llm(concept: str, background: str, audience: str, tone: str) -> Dict[str, str]:
     api_key = os.getenv("PORTKEY_API_KEY")
     if not api_key:
+        st.session_state.model_status = "Using fallback: PORTKEY_API_KEY is not configured."
         return fallback_response(concept, background, audience, tone)
 
     try:
@@ -151,9 +153,7 @@ Tone: {tone}
 Explain this concept to the target audience."""
 
         response = client.chat.completions.create(
-            model=os.getenv(
-                "PORTKEY_MODEL", "@vertexai/anthropic.claude-opus-4-6"
-            ),
+            model=os.getenv("PORTKEY_MODEL", DEFAULT_PORTKEY_MODEL),
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
@@ -162,12 +162,19 @@ Explain this concept to the target audience."""
             temperature=0.7,
         )
         content = response.choices[0].message.content or "{}"
-        return parse_json_response(content)
+        parsed = parse_json_response(content)
+        st.session_state.model_status = (
+            f"Using live model: {os.getenv('PORTKEY_MODEL', DEFAULT_PORTKEY_MODEL)}"
+        )
+        return parsed
     except Exception as exc:
         st.warning(
             "The live model response was unavailable or malformed, so the app used the reliable demo fallback."
         )
-        st.caption(f"Fallback reason: {exc.__class__.__name__}")
+        st.caption(f"Fallback reason: {exc.__class__.__name__}: {exc}")
+        st.session_state.model_status = (
+            f"Using fallback: {exc.__class__.__name__}: {exc}"
+        )
         return fallback_response(concept, background, audience, tone)
 
 
@@ -449,6 +456,8 @@ def main() -> None:
 
     if "last_response" in st.session_state:
         st.markdown('<div class="section-kicker">Context translation</div>', unsafe_allow_html=True)
+        if "model_status" in st.session_state:
+            st.caption(st.session_state.model_status)
         response = st.session_state.last_response
         for row in range(0, len(FIELDS), 2):
             cols = st.columns(2)
