@@ -176,16 +176,18 @@ def inject_styles() -> None:
         """
         <style>
         :root {
-            --accent: #b85c38;
-            --ink: #2a211d;
-            --muted: #6b5f58;
-            --surface: #fffaf4;
-            --card: #ffffff;
-            --line: #eadfd5;
+            --accent: #e8845c;
+            --ink: #f0e8e0;
+            --muted: #9e8f87;
+            --surface: #1e1a18;
+            --card: #252120;
+            --line: #3a3330;
+            --bg-top: #141210;
+            --bg-bot: #1a1614;
         }
 
         .stApp {
-            background: linear-gradient(180deg, #fff8f0 0%, #f8efe6 100%);
+            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bot) 100%);
             color: var(--ink);
         }
 
@@ -262,7 +264,7 @@ def inject_styles() -> None:
         div[data-testid="stButton"] button {
             background: var(--card);
             border-radius: 8px;
-            border: 1px solid rgba(184, 92, 56, 0.25);
+            border: 1px solid var(--line);
             color: var(--ink);
             font-weight: 700;
         }
@@ -281,7 +283,12 @@ def inject_styles() -> None:
         div[data-testid="stButton"] button[kind="primary"] {
             background: var(--accent);
             border-color: var(--accent);
-            color: #fff;
+            color: #141210;
+        }
+
+        div[data-testid="stButton"] button:hover {
+            border-color: var(--accent) !important;
+            color: var(--accent) !important;
         }
 
         div[data-testid="stButton"] button[kind="primary"]:hover {
@@ -303,7 +310,7 @@ def inject_styles() -> None:
             background: var(--card);
             border: 1px solid var(--line);
             border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(80, 50, 30, 0.06);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             min-height: 148px;
             padding: 1.05rem 1.1rem;
         }
@@ -323,23 +330,28 @@ def inject_styles() -> None:
         }
 
         .share-card {
-            background: #2f2723;
+            background: #0e0c0b;
+            border: 1px solid var(--line);
             border-radius: 8px;
-            color: #fff8f0;
+            color: var(--ink);
             padding: 1rem 1.15rem;
             margin-top: 0.4rem;
         }
 
         .share-card h3 {
-            color: #ffd7be;
+            color: var(--accent);
             font-size: 1rem;
             margin: 0 0 0.45rem;
         }
 
         .share-card p {
-            color: #fff8f0;
+            color: var(--ink);
             line-height: 1.5;
             margin: 0;
+        }
+
+        label, .stSelectbox label, .stTextInput label, .stTextArea label {
+            color: var(--muted) !important;
         }
 
         @media (max-width: 640px) {
