@@ -13,6 +13,13 @@ The app has six modes:
 - Compare Cultures: explains one cultural concept through another culture's familiar reference points.
 - Personal Archive: turns family sayings, rituals, food memories, and traditions into saved archive entries.
 
+Recent product polish:
+
+- Mode-specific quick starts for demo-ready examples.
+- Copy-ready panels for the most useful generated text.
+- Local archive persistence in `culture-remix-archive.local.json`.
+- One retry for malformed live-model JSON before falling back.
+
 ## Run locally
 
 ```powershell
@@ -32,6 +39,7 @@ PORTKEY_BASE_URL=https://ai-gateway.apps.cloud.rt.nyu.edu/v1
 PORTKEY_MODEL=@vertexai/anthropic.claude-opus-4-6
 PORTKEY_MAX_TOKENS=2048
 PORTKEY_TIMEOUT_SECONDS=90
+PORTKEY_RETRIES=1
 ```
 
 When these values are present, the app calls Claude Opus through Portkey. If the gateway is unavailable or returns malformed JSON, the app falls back to deterministic responses so the demo still works. The result area shows whether the app used the live model or fallback.
@@ -39,10 +47,10 @@ When these values are present, the app calls Claude Opus through Portkey. If the
 ## Demo flow
 
 1. Open with: "Most translation tools tell you what words mean. This tells you what they mean emotionally."
-2. Click: `Why Nepali parents ask "khana khayau?" instead of saying "I love you"`
-3. Set target audience to `American coworkers`
-4. Set tone to `First-gen kid explaining it to coworkers`
-5. Click `Translate the context`
+2. Click the `Khana Khayau?` quick start.
+3. Confirm the target audience is `American coworkers`.
+4. Confirm the tone is `First-gen kid explaining it to coworkers`.
+5. Click `Translate Context`.
 6. Point out the literal meaning, deeper cultural meaning, misunderstanding, modern analogy, and say-it-out-loud version.
 7. Switch to Cultural Copilot or Family Translator to show that the app goes beyond definition and helps with real communication.
 8. End with: "The point is not to make culture simpler. It is to make it easier to share without losing the feeling."

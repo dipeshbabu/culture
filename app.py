@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from html import escape
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 import streamlit as st
@@ -15,6 +16,7 @@ except ImportError:  # pragma: no cover - dependency may be absent in fallback d
 APP_TITLE = "Culture Remix Translator"
 TAGLINE = "Most translation apps translate words. This translates context."
 DEFAULT_PORTKEY_MODEL = "@vertexai/anthropic.claude-opus-4-6"
+ARCHIVE_PATH = Path("culture-remix-archive.local.json")
 
 FieldList = List[Tuple[str, str]]
 
@@ -80,6 +82,166 @@ EXAMPLES = [
     "Namaste, but not in a yoga-studio way",
 ]
 
+TRANSLATOR_PRESETS = [
+    {
+        "label": "Khana Khayau?",
+        "concept": EXAMPLES[0],
+        "background": "Nepali / South Asian",
+        "audience": "American coworkers",
+        "tone": "First-gen kid explaining it to coworkers",
+    },
+    {
+        "label": "Dashain Tika",
+        "concept": "Dashain tika",
+        "background": "Nepali",
+        "audience": "American friends",
+        "tone": "Warm and thoughtful",
+    },
+    {
+        "label": "Auntie Culture",
+        "concept": "Auntie culture",
+        "background": "South Asian",
+        "audience": "College friends",
+        "tone": "Funny but respectful",
+    },
+    {
+        "label": "Namaste Context",
+        "concept": "Namaste, but not in a yoga-studio way",
+        "background": "Nepali / Indian",
+        "audience": "Western wellness audience",
+        "tone": "Friend explaining to friend",
+    },
+]
+
+COPILOT_PRESETS = [
+    {
+        "label": "Time-Off Note",
+        "task": "Workplace time-off note",
+        "context": "I want to explain why Dashain matters to me when I ask for time off.",
+        "background": "Nepali",
+        "audience": "Manager",
+        "tone": "Professional but personal",
+    },
+    {
+        "label": "Wedding Toast",
+        "task": "Speech or toast",
+        "context": "I want to explain receiving blessings from elders without making it sound overly formal.",
+        "background": "Nepali / South Asian",
+        "audience": "Mixed-culture wedding guests",
+        "tone": "Warm and thoughtful",
+    },
+    {
+        "label": "Instagram Caption",
+        "task": "Social caption",
+        "context": "I want to caption a photo of Dashain tika in a way that feels personal, not generic.",
+        "background": "Nepali",
+        "audience": "Friends who do not know Dashain",
+        "tone": "Text message, natural",
+    },
+]
+
+MISUNDERSTANDING_PRESETS = [
+    {
+        "label": "Auntie Gossip",
+        "concept": "Auntie culture",
+        "misunderstanding": "My coworker thought auntie culture just meant gossip.",
+        "background": "South Asian",
+        "audience": "Coworker",
+        "outcome": "Correct them kindly",
+    },
+    {
+        "label": "Namaste Yoga",
+        "concept": "Namaste",
+        "misunderstanding": "Someone said namaste is just a yoga studio word.",
+        "background": "Nepali / Indian",
+        "audience": "Friend",
+        "outcome": "Explain without making it awkward",
+    },
+    {
+        "label": "Food Pressure",
+        "concept": "Khana khayau?",
+        "misunderstanding": "They thought my parents were only pressuring me to eat.",
+        "background": "Nepali / South Asian",
+        "audience": "Partner",
+        "outcome": "Explain without making it awkward",
+    },
+]
+
+FAMILY_PRESETS = [
+    {
+        "label": "Did You Eat?",
+        "situation": "My mom keeps asking if I ate. I know she cares, but sometimes it feels like pressure.",
+        "older_side": "She is trying to show care through food and checking in.",
+        "younger_side": "I want to feel trusted and not monitored.",
+        "background": "Nepali / South Asian",
+        "goal": "Set a soft boundary",
+    },
+    {
+        "label": "Career Advice",
+        "situation": "My parents keep suggesting safer career paths even though I want to pursue creative work.",
+        "older_side": "They may connect stability with safety, sacrifice, and love.",
+        "younger_side": "I want them to understand that creative work is not the same as being irresponsible.",
+        "background": "Immigrant family",
+        "goal": "Explain both sides",
+    },
+    {
+        "label": "Calling Home",
+        "situation": "My family feels hurt when I do not call often, but frequent calls can feel overwhelming.",
+        "older_side": "Calls may be how they feel included and reassured.",
+        "younger_side": "I need independence and a rhythm I can actually keep.",
+        "background": "First-gen / immigrant family",
+        "goal": "Respond kindly",
+    },
+]
+
+COMPARE_PRESETS = [
+    {
+        "label": "Dashain & Thanksgiving",
+        "concept": "Dashain tika",
+        "source": "Nepali",
+        "target": "American",
+        "familiarity": "They understand Thanksgiving, Christmas family gatherings, and receiving blessings at major life events.",
+    },
+    {
+        "label": "Namaste & Handshake",
+        "concept": "Namaste",
+        "source": "Nepali / Indian",
+        "target": "American",
+        "familiarity": "They understand handshakes, respectful greetings, and small gestures of politeness.",
+    },
+    {
+        "label": "Aunties & Community Elders",
+        "concept": "Auntie culture",
+        "source": "South Asian",
+        "target": "American",
+        "familiarity": "They understand neighbors, family friends, church/community elders, and local social networks.",
+    },
+]
+
+ARCHIVE_PRESETS = [
+    {
+        "label": "Khana Khayau?",
+        "title": "Khana khayau?",
+        "memory": "My parents ask if I ate whenever they call, even when they do not say emotional things directly.",
+        "meaning": "It is a way of checking if I am okay and showing care through food.",
+        "background": "Nepali / South Asian",
+    },
+    {
+        "label": "Festival Clothes",
+        "title": "Festival clothes",
+        "memory": "My family takes photos in traditional clothes during festivals, even when everyone is busy or tired.",
+        "meaning": "It preserves continuity and reminds us that we still belong to something together.",
+        "background": "Diaspora family",
+    },
+    {
+        "label": "Elder Blessings",
+        "title": "Blessings from elders",
+        "memory": "During festivals, elders bless us before we leave or start something important.",
+        "meaning": "It is not just ritual. It is a way of sending protection, pride, and family memory with us.",
+        "background": "Nepali / South Asian",
+    },
+]
+
 BASE_SYSTEM_PROMPT = """You are Culture Remix Translator, a cultural communication assistant.
 
 Your job is not only to translate words. Your job is to translate context, emotion, social meaning, family meaning, and common misunderstandings.
@@ -140,6 +302,18 @@ def parse_json_response(content: str, fields: FieldList) -> Dict[str, str]:
     return {key: str(parsed[key]).strip() for key, _ in fields}
 
 
+def make_retry_prompt(fields: FieldList, previous_content: str, error: Exception) -> str:
+    return f"""The previous response could not be parsed as the required JSON.
+
+Parse error: {error.__class__.__name__}: {error}
+
+Return JSON only with exactly these fields:
+{schema_instructions(fields)}
+
+Previous response:
+{previous_content[:3000]}"""
+
+
 def get_portkey_max_tokens() -> int:
     try:
         return int(os.getenv("PORTKEY_MAX_TOKENS", "2048"))
@@ -152,6 +326,39 @@ def get_portkey_timeout() -> int:
         return int(os.getenv("PORTKEY_TIMEOUT_SECONDS", "90"))
     except ValueError:
         return 90
+
+
+def get_portkey_retries() -> int:
+    try:
+        return max(0, int(os.getenv("PORTKEY_RETRIES", "1")))
+    except ValueError:
+        return 1
+
+
+def load_archive_items() -> List[Dict[str, object]]:
+    if not ARCHIVE_PATH.exists():
+        return []
+
+    try:
+        data = json.loads(ARCHIVE_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    if not isinstance(data, list):
+        return []
+    return [item for item in data if isinstance(item, dict)]
+
+
+def persist_archive_items(items: List[Dict[str, object]]) -> None:
+    try:
+        ARCHIVE_PATH.write_text(json.dumps(items, indent=2), encoding="utf-8")
+    except OSError as exc:
+        st.warning(f"Archive could not be saved locally: {exc}")
+
+
+def ensure_archive_loaded() -> None:
+    if "archive_items" not in st.session_state:
+        st.session_state.archive_items = load_archive_items()
 
 
 def call_structured_model(
@@ -181,20 +388,35 @@ Mode: {mode_name}
 
 Return valid JSON only with exactly these fields:
 {schema_instructions(fields)}"""
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            max_tokens=get_portkey_max_tokens(),
-            temperature=0.7,
-            timeout=get_portkey_timeout(),
-        )
-        content = response.choices[0].message.content or "{}"
-        parsed = parse_json_response(content, fields)
-        set_model_status(f"Using live model: {model}")
-        return parsed
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        attempts = get_portkey_retries() + 1
+        last_error: Exception | None = None
+        last_content = ""
+        for attempt in range(attempts):
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=get_portkey_max_tokens(),
+                temperature=0.7 if attempt == 0 else 0.2,
+                timeout=get_portkey_timeout(),
+            )
+            last_content = response.choices[0].message.content or "{}"
+            try:
+                parsed = parse_json_response(last_content, fields)
+                suffix = "" if attempt == 0 else f" after {attempt + 1} attempts"
+                set_model_status(f"Using live model: {model}{suffix}")
+                return parsed
+            except (json.JSONDecodeError, ValueError) as exc:
+                last_error = exc
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": make_retry_prompt(fields, last_content, exc)},
+                ]
+
+        raise ValueError(f"Could not parse model JSON after {attempts} attempts: {last_error}")
     except Exception as exc:
         st.warning(
             "The live model response was unavailable or malformed, so the app used the reliable demo fallback."
@@ -889,6 +1111,13 @@ def render_card(title: str, body: str) -> None:
     st.markdown(card_html(title, body), unsafe_allow_html=True)
 
 
+def render_copy_panel(title: str, text: str, _key: str) -> None:
+    if not text:
+        return
+    st.markdown(f'<div class="section-kicker">{escape(title)}</div>', unsafe_allow_html=True)
+    st.code(text, language=None)
+
+
 def render_results(fields: FieldList, response: Dict[str, str], share_key: str = "") -> None:
     if "model_status" in st.session_state:
         status = st.session_state.model_status
@@ -918,11 +1147,11 @@ def render_results(fields: FieldList, response: Dict[str, str], share_key: str =
             """,
             unsafe_allow_html=True,
         )
+        render_copy_panel("Copy-ready text", response[share_key], share_key)
 
 
 def add_to_archive(mode: str, title: str, response: Dict[str, str]) -> None:
-    if "archive_items" not in st.session_state:
-        st.session_state.archive_items = []
+    ensure_archive_loaded()
     st.session_state.archive_items.insert(
         0,
         {
@@ -932,21 +1161,57 @@ def add_to_archive(mode: str, title: str, response: Dict[str, str]) -> None:
             "response": response,
         },
     )
+    persist_archive_items(st.session_state.archive_items)
 
 
 def archive_download() -> str:
     return json.dumps(st.session_state.get("archive_items", []), indent=2)
 
 
+def archive_entry_preview(item: Dict[str, object]) -> Tuple[str, str]:
+    response = item.get("response")
+    if not isinstance(response, dict):
+        response = {}
+
+    title = str(item.get("title") or "Untitled entry")
+    mode = str(item.get("mode") or "Archive")
+    body = (
+        response.get("how_to_explain_it")
+        or response.get("say_it_out_loud")
+        or response.get("best_version")
+        or next((str(value) for value in response.values() if value), "")
+    )
+    return f"{title} - {mode}", str(body)
+
+
+def set_defaults(defaults: Dict[str, str]) -> None:
+    for key, value in defaults.items():
+        st.session_state.setdefault(key, value)
+
+
+def render_preset_buttons(
+    presets: List[Dict[str, str]],
+    key_prefix: str,
+    field_map: Dict[str, str],
+) -> None:
+    st.markdown('<div class="section-kicker">Quick starts</div>', unsafe_allow_html=True)
+    cols = st.columns(min(4, len(presets)))
+    for index, preset in enumerate(presets):
+        with cols[index % len(cols)]:
+            label = preset["label"]
+            if st.button(label, key=f"{key_prefix}_preset_{index}", use_container_width=True):
+                for preset_key, state_key in field_map.items():
+                    st.session_state[state_key] = preset[preset_key]
+                st.rerun()
+
+
 def common_context(prefix: str = "") -> Tuple[str, str, str]:
     background = st.text_input(
         "My background",
-        value="Nepali / South Asian",
         key=f"{prefix}background",
     )
     audience = st.text_input(
         "Target audience",
-        value="American coworkers or friends",
         key=f"{prefix}audience",
     )
     tone = st.selectbox(
@@ -960,22 +1225,30 @@ def common_context(prefix: str = "") -> Tuple[str, str, str]:
             "Professional but personal",
             "Text message, natural",
         ],
-        index=0,
         key=f"{prefix}tone",
     )
     return background, audience, tone
 
 
 def translator_mode() -> None:
-    if "concept" not in st.session_state:
-        st.session_state.concept = EXAMPLES[0]
-
-    st.markdown('<div class="section-kicker">Demo examples</div>', unsafe_allow_html=True)
-    example_cols = st.columns(4)
-    for col, example in zip(example_cols, EXAMPLES):
-        with col:
-            if st.button(example, key=f"example-{example}", use_container_width=True):
-                st.session_state.concept = example
+    set_defaults(
+        {
+            "concept": EXAMPLES[0],
+            "translator_background": "Nepali / South Asian",
+            "translator_audience": "American coworkers or friends",
+            "translator_tone": "Friend explaining to friend",
+        }
+    )
+    render_preset_buttons(
+        TRANSLATOR_PRESETS,
+        "translator",
+        {
+            "concept": "concept",
+            "background": "translator_background",
+            "audience": "translator_audience",
+            "tone": "translator_tone",
+        },
+    )
 
     left, right = st.columns([1.1, 0.9], gap="large")
     with left:
@@ -983,14 +1256,14 @@ def translator_mode() -> None:
             "Cultural phrase or concept",
             key="concept",
             height=150,
-            placeholder="Example: Why Nepali parents ask \"khana khayau?\" instead of saying \"I love you\"…",
+            placeholder="Example: Why Nepali parents ask \"khana khayau?\" instead of saying \"I love you\"...",
         )
     with right:
         background, audience, tone = common_context("translator_")
 
     if st.button("Translate Context", type="primary", use_container_width=True):
         final_concept = clean_concept(concept)
-        with st.spinner("Translating context…"):
+        with st.spinner("Translating context..."):
             response = build_translator_response(final_concept, background, audience, tone)
         st.session_state.translator_response = response
         st.session_state.translator_title = final_concept
@@ -1002,6 +1275,26 @@ def translator_mode() -> None:
 
 
 def copilot_mode() -> None:
+    set_defaults(
+        {
+            "copilot_task": "Workplace time-off note",
+            "copilot_context": "I want to explain why Dashain matters to me when I ask for time off.",
+            "copilot_background": "Nepali / South Asian",
+            "copilot_audience": "American coworkers or friends",
+            "copilot_tone": "Professional but personal",
+        }
+    )
+    render_preset_buttons(
+        COPILOT_PRESETS,
+        "copilot",
+        {
+            "task": "copilot_task",
+            "context": "copilot_context",
+            "background": "copilot_background",
+            "audience": "copilot_audience",
+            "tone": "copilot_tone",
+        },
+    )
     left, right = st.columns([1.05, 0.95], gap="large")
     with left:
         task = st.selectbox(
@@ -1014,18 +1307,19 @@ def copilot_mode() -> None:
                 "Classroom explanation",
                 "Workplace time-off note",
             ],
+            key="copilot_task",
         )
         context = st.text_area(
             "What cultural meaning do you need to communicate?",
-            value="I want to explain why Dashain matters to me when I ask for time off.",
-            placeholder="Example: I want to explain why Dashain matters to me when I ask for time off…",
+            placeholder="Example: I want to explain why Dashain matters to me when I ask for time off...",
             height=160,
+            key="copilot_context",
         )
     with right:
         background, audience, tone = common_context("copilot_")
 
     if st.button("Draft Message", type="primary", use_container_width=True):
-        with st.spinner("Writing versions…"):
+        with st.spinner("Writing versions..."):
             response = build_copilot_response(task, context, background, audience, tone)
         st.session_state.copilot_response = response
         add_to_archive("Cultural Copilot", task, response)
@@ -1036,18 +1330,38 @@ def copilot_mode() -> None:
 
 
 def misunderstanding_mode() -> None:
+    set_defaults(
+        {
+            "mis_concept": "Auntie culture",
+            "mis_misunderstanding": "My coworker thought auntie culture just meant gossip.",
+            "mis_background": "South Asian",
+            "mis_audience": "Coworker",
+            "mis_outcome": "Correct them kindly",
+        }
+    )
+    render_preset_buttons(
+        MISUNDERSTANDING_PRESETS,
+        "misunderstanding",
+        {
+            "concept": "mis_concept",
+            "misunderstanding": "mis_misunderstanding",
+            "background": "mis_background",
+            "audience": "mis_audience",
+            "outcome": "mis_outcome",
+        },
+    )
     left, right = st.columns([1.05, 0.95], gap="large")
     with left:
-        concept = st.text_input("Cultural phrase or practice", value="Auntie culture")
+        concept = st.text_input("Cultural phrase or practice", key="mis_concept")
         misunderstanding = st.text_area(
             "What did they misunderstand?",
-            value="My coworker thought auntie culture just meant gossip.",
-            placeholder="Example: My coworker thought auntie culture just meant gossip…",
+            placeholder="Example: My coworker thought auntie culture just meant gossip...",
             height=140,
+            key="mis_misunderstanding",
         )
     with right:
-        background = st.text_input("My background", value="South Asian", key="mis_background")
-        audience = st.text_input("Who misunderstood it?", value="Coworker", key="mis_audience")
+        background = st.text_input("My background", key="mis_background")
+        audience = st.text_input("Who misunderstood it?", key="mis_audience")
         desired_outcome = st.selectbox(
             "Desired Outcome",
             [
@@ -1056,10 +1370,11 @@ def misunderstanding_mode() -> None:
                 "Set a boundary",
                 "Make it funny but respectful",
             ],
+            key="mis_outcome",
         )
 
     if st.button("Repair Misunderstanding", type="primary", use_container_width=True):
-        with st.spinner("Building repair response…"):
+        with st.spinner("Building repair response..."):
             response = build_misunderstanding_response(
                 concept, misunderstanding, background, audience, desired_outcome
             )
@@ -1072,28 +1387,48 @@ def misunderstanding_mode() -> None:
 
 
 def family_mode() -> None:
+    set_defaults(
+        {
+            "family_situation": "My mom keeps asking if I ate. I know she cares, but sometimes it feels like pressure.",
+            "family_older_side": "She is trying to show care through food and checking in.",
+            "family_younger_side": "I want to feel trusted and not monitored.",
+            "family_background": "Nepali / South Asian",
+            "family_goal": "Set a soft boundary",
+        }
+    )
+    render_preset_buttons(
+        FAMILY_PRESETS,
+        "family",
+        {
+            "situation": "family_situation",
+            "older_side": "family_older_side",
+            "younger_side": "family_younger_side",
+            "background": "family_background",
+            "goal": "family_goal",
+        },
+    )
     left, right = st.columns([1.05, 0.95], gap="large")
     with left:
         situation = st.text_area(
             "Family situation",
-            value="My mom keeps asking if I ate. I know she cares, but sometimes it feels like pressure.",
-            placeholder="Example: My mom keeps asking if I ate, and I know she cares, but it feels like pressure…",
+            placeholder="Example: My mom keeps asking if I ate, and I know she cares, but it feels like pressure...",
             height=145,
+            key="family_situation",
         )
         older_side = st.text_area(
             "Older generation or first person's side",
-            value="She is trying to show care through food and checking in.",
-            placeholder="Example: She is trying to show care through food and checking in…",
+            placeholder="Example: She is trying to show care through food and checking in...",
             height=110,
+            key="family_older_side",
         )
     with right:
         younger_side = st.text_area(
             "Younger generation or second person's side",
-            value="I want to feel trusted and not monitored.",
-            placeholder="Example: I want to feel trusted and not monitored…",
+            placeholder="Example: I want to feel trusted and not monitored...",
             height=110,
+            key="family_younger_side",
         )
-        background = st.text_input("Family background", value="Nepali / South Asian", key="family_background")
+        background = st.text_input("Family background", key="family_background")
         goal = st.selectbox(
             "Conversation Goal",
             [
@@ -1102,10 +1437,11 @@ def family_mode() -> None:
                 "Set a soft boundary",
                 "Prepare for a hard conversation",
             ],
+            key="family_goal",
         )
 
     if st.button("Translate Family Meaning", type="primary", use_container_width=True):
-        with st.spinner("Translating both sides…"):
+        with st.spinner("Translating both sides..."):
             response = build_family_response(situation, older_side, younger_side, background, goal)
         st.session_state.family_response = response
         add_to_archive("Family Translator", "Family translation", response)
@@ -1116,21 +1452,39 @@ def family_mode() -> None:
 
 
 def compare_mode() -> None:
+    set_defaults(
+        {
+            "compare_concept": "Dashain tika",
+            "compare_familiarity": "They understand Thanksgiving, Christmas family gatherings, and receiving blessings at major life events.",
+            "compare_source": "Nepali",
+            "compare_target": "American",
+        }
+    )
+    render_preset_buttons(
+        COMPARE_PRESETS,
+        "compare",
+        {
+            "concept": "compare_concept",
+            "source": "compare_source",
+            "target": "compare_target",
+            "familiarity": "compare_familiarity",
+        },
+    )
     left, right = st.columns([1.05, 0.95], gap="large")
     with left:
-        concept = st.text_input("Concept to explain", value="Dashain tika")
+        concept = st.text_input("Concept to explain", key="compare_concept")
         target_familiarity = st.text_area(
             "What might the target audience already understand?",
-            value="They understand Thanksgiving, Christmas family gatherings, and receiving blessings at major life events.",
-            placeholder="Example: They understand Thanksgiving, Christmas family gatherings, and receiving blessings…",
+            placeholder="Example: They understand Thanksgiving, Christmas family gatherings, and receiving blessings...",
             height=135,
+            key="compare_familiarity",
         )
     with right:
-        source_culture = st.text_input("Source culture", value="Nepali")
-        target_culture = st.text_input("Target culture", value="American")
+        source_culture = st.text_input("Source culture", key="compare_source")
+        target_culture = st.text_input("Target culture", key="compare_target")
 
     if st.button("Compare Cultures", type="primary", use_container_width=True):
-        with st.spinner("Finding bridges and differences…"):
+        with st.spinner("Finding bridges and differences..."):
             response = build_compare_response(concept, source_culture, target_culture, target_familiarity)
         st.session_state.compare_response = response
         add_to_archive("Compare Cultures", concept, response)
@@ -1141,29 +1495,46 @@ def compare_mode() -> None:
 
 
 def archive_mode() -> None:
-    if "archive_items" not in st.session_state:
-        st.session_state.archive_items = []
+    ensure_archive_loaded()
+    set_defaults(
+        {
+            "archive_title": "Khana khayau?",
+            "archive_memory": "My parents ask if I ate whenever they call, even when they do not say emotional things directly.",
+            "archive_meaning": "It is a way of checking if I am okay and showing care through food.",
+            "archive_background": "Nepali / South Asian",
+        }
+    )
+    render_preset_buttons(
+        ARCHIVE_PRESETS,
+        "archive",
+        {
+            "title": "archive_title",
+            "memory": "archive_memory",
+            "meaning": "archive_meaning",
+            "background": "archive_background",
+        },
+    )
 
     left, right = st.columns([1.05, 0.95], gap="large")
     with left:
-        title = st.text_input("Archive title", value="Khana khayau?")
+        title = st.text_input("Archive title", key="archive_title")
         memory = st.text_area(
             "Memory, ritual, saying, food, or tradition",
-            value="My parents ask if I ate whenever they call, even when they do not say emotional things directly.",
-            placeholder="Example: My parents ask if I ate whenever they call…",
+            placeholder="Example: My parents ask if I ate whenever they call...",
             height=145,
+            key="archive_memory",
         )
     with right:
         meaning = st.text_area(
             "Meaning you want preserved",
-            value="It is a way of checking if I am okay and showing care through food.",
-            placeholder="Example: It is a way of checking if I am okay and showing care through food…",
+            placeholder="Example: It is a way of checking if I am okay and showing care through food...",
             height=110,
+            key="archive_meaning",
         )
-        background = st.text_input("Family or cultural background", value="Nepali / South Asian")
+        background = st.text_input("Family or cultural background", key="archive_background")
 
     if st.button("Create Archive Entry", type="primary", use_container_width=True):
-        with st.spinner("Preserving memory…"):
+        with st.spinner("Preserving memory..."):
             response = build_archive_response(title, memory, meaning, background)
         st.session_state.archive_response = response
         add_to_archive("Personal Archive", response.get("archive_title", title), response)
@@ -1182,8 +1553,7 @@ def archive_mode() -> None:
             use_container_width=True,
         )
         for item in st.session_state.archive_items[:8]:
-            title_text = f"{item['title']} - {item['mode']}"
-            body = item["response"].get("how_to_explain_it") or item["response"].get("say_it_out_loud") or item["response"].get("best_version") or next(iter(item["response"].values()), "")
+            title_text, body = archive_entry_preview(item)
             render_card(title_text, body)
     else:
         render_card("No saved entries yet", "Translate, draft, repair, compare, or create an archive entry to save it here during this session.")
