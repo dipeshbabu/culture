@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 from html import escape
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, List, Tuple
 
 import streamlit as st
 
@@ -447,19 +447,56 @@ def inject_styles() -> None:
         """
         <style>
         :root {
-            --accent: #e8845c;
-            --ink: #f0e8e0;
-            --muted: #b2a49c;
-            --surface: #1e1a18;
-            --card: #252120;
-            --line: #3a3330;
-            --bg-top: #141210;
-            --bg-bot: #1a1614;
+            color-scheme: light;
+            --accent: #0070f3;
+            --accent-strong: #005bd3;
+            --warm: #b45309;
+            --ink: #09090b;
+            --muted: #71717a;
+            --soft: #3f3f46;
+            --surface: #ffffff;
+            --surface-raised: #fafafa;
+            --card: #ffffff;
+            --card-hover: #f7f7f8;
+            --line: #e4e4e7;
+            --line-strong: #c9c9cf;
+            --bg-top: #ffffff;
+            --bg-bot: #f4f4f5;
+            --focus: rgba(0, 112, 243, 0.22);
+            --shadow: 0 18px 44px rgba(24, 24, 27, 0.08);
         }
 
         .stApp {
-            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bot) 100%);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(244, 244, 245, 0.96) 100%);
             color: var(--ink);
+            overflow-x: hidden;
+            overscroll-behavior-x: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .skip-link {
+            background: var(--ink);
+            border-radius: 10px;
+            color: #ffffff;
+            font-weight: 700;
+            left: 1rem;
+            padding: 0.65rem 0.85rem;
+            position: fixed;
+            top: 1rem;
+            transform: translateY(-180%);
+            transition: transform 140ms ease;
+            z-index: 9999;
+        }
+
+        .skip-link:focus-visible {
+            box-shadow: 0 0 0 3px var(--focus);
+            outline: 0;
+            transform: translateY(0);
+        }
+
+        #main-content {
+            scroll-margin-top: 1rem;
         }
 
         header[data-testid="stHeader"] {
@@ -474,47 +511,80 @@ def inject_styles() -> None:
         }
 
         .block-container {
-            max-width: 1120px;
-            padding-top: 2.4rem;
-            padding-bottom: 3rem;
+            max-width: 1180px;
+            padding-top: 2rem;
+            padding-bottom: 4rem;
+            padding-left: max(1.25rem, env(safe-area-inset-left));
+            padding-right: max(1.25rem, env(safe-area-inset-right));
         }
 
         h1 {
             color: var(--ink);
-            font-size: 3rem !important;
-            line-height: 1.05 !important;
+            font-size: clamp(2.55rem, 6vw, 5.25rem) !important;
+            font-weight: 800 !important;
+            line-height: 0.95 !important;
             letter-spacing: 0 !important;
-            margin-bottom: 0.35rem !important;
+            margin-bottom: 0.85rem !important;
+            max-width: 900px;
+            text-wrap: balance;
         }
 
         .tagline {
-            color: var(--accent);
-            font-size: 1.28rem;
+            color: var(--ink);
+            font-size: clamp(1.12rem, 2vw, 1.38rem);
             font-weight: 700;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.55rem;
+            max-width: 840px;
         }
 
         .intro {
             color: var(--muted);
-            font-size: 1.02rem;
-            max-width: 780px;
-            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+            line-height: 1.65;
+            max-width: 790px;
+            margin-bottom: 1rem;
+            text-wrap: pretty;
+        }
+
+        .hero-strip {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            margin: 0.2rem 0 1.25rem;
+        }
+
+        .hero-pill {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--soft);
+            font-size: 0.82rem;
+            font-weight: 650;
+            padding: 0.34rem 0.65rem;
+            box-shadow: 0 6px 20px rgba(24, 24, 27, 0.04);
+        }
+
+        .hero-pill strong {
+            color: var(--ink);
+            font-weight: 750;
         }
 
         label,
         div[data-testid="stTextArea"] label p,
         div[data-testid="stTextInput"] label p,
-        div[data-testid="stSelectbox"] label p,
-        div[data-testid="stRadio"] label p {
+        div[data-testid="stSelectbox"] label p {
             color: var(--ink) !important;
         }
 
         div[data-testid="stTextArea"] textarea,
         div[data-testid="stTextInput"] input {
-            border-radius: 8px;
-            border-color: var(--line);
+            border-radius: 10px;
+            border: 1px solid var(--line);
             background: var(--surface);
             color: var(--ink);
+            box-shadow: inset 0 0 0 1px transparent;
+            transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
         }
 
         div[data-testid="stTextArea"] textarea::placeholder,
@@ -523,28 +593,92 @@ def inject_styles() -> None:
             opacity: 0.75;
         }
 
+        div[data-testid="stTextArea"] textarea:focus-visible,
+        div[data-testid="stTextInput"] input:focus-visible {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px var(--focus) !important;
+            outline: 0;
+        }
+
         div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
             background: var(--surface);
             border-color: var(--line);
             color: var(--ink);
+            border-radius: 10px;
+        }
+
+        div[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within > div {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px var(--focus) !important;
         }
 
         div[data-testid="stSelectbox"] [data-baseweb="select"] span {
             color: var(--ink);
         }
 
+        div[data-testid="stTabs"] [role="tablist"] {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            gap: 0.15rem;
+            margin: 1.2rem 0 0.6rem;
+            overflow-x: auto;
+            padding: 0.28rem;
+            box-shadow: 0 10px 30px rgba(24, 24, 27, 0.05);
+        }
+
+        div[data-testid="stTabs"] button[role="tab"] {
+            border-radius: 9px;
+            color: var(--muted);
+            min-height: 2.45rem;
+            padding: 0.35rem 0.7rem;
+            transition: background-color 140ms ease, color 140ms ease;
+        }
+
+        div[data-testid="stTabs"] button[role="tab"]:hover {
+            background: var(--surface-raised);
+            color: var(--ink);
+        }
+
+        div[data-testid="stTabs"] button[role="tab"]:focus-visible {
+            box-shadow: 0 0 0 3px var(--focus);
+            outline: 0;
+        }
+
+        div[data-testid="stTabs"] button[aria-selected="true"] {
+            background: var(--ink);
+            color: var(--ink) !important;
+        }
+
+        div[data-testid="stTabs"] button[aria-selected="true"] p {
+            color: #ffffff !important;
+            font-weight: 750;
+        }
+
         div[data-testid="stButton"] button {
-            background: var(--card);
-            border-radius: 8px;
+            background: var(--surface-raised);
+            border-radius: 10px;
             border: 1px solid var(--line);
             color: var(--ink);
             font-weight: 700;
+            min-height: 2.55rem;
+            touch-action: manipulation;
+            transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
         }
 
         div[data-testid="stButton"] button:hover {
-            background: var(--surface);
+            background: var(--card-hover);
             border-color: var(--accent) !important;
             color: var(--accent) !important;
+        }
+
+        div[data-testid="stButton"] button:active {
+            transform: translateY(1px);
+        }
+
+        div[data-testid="stButton"] button:focus-visible {
+            box-shadow: 0 0 0 3px var(--focus);
+            outline: 0;
         }
 
         div[data-testid="stButton"] button p,
@@ -553,57 +687,83 @@ def inject_styles() -> None:
         }
 
         div[data-testid="stButton"] button[kind="primary"] {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #141210;
+            background: var(--ink);
+            border-color: var(--ink);
+            color: #ffffff;
         }
 
         div[data-testid="stButton"] button[kind="primary"]:hover {
-            background: #9f4e2f;
-            border-color: #9f4e2f;
-            color: #fff;
+            background: var(--accent);
+            border-color: var(--accent) !important;
+            color: #ffffff !important;
         }
 
         .section-kicker {
             color: var(--muted);
-            font-size: 0.86rem;
-            font-weight: 700;
+            font-size: 0.76rem;
+            font-weight: 780;
             letter-spacing: 0.06em;
-            margin-top: 0.5rem;
+            margin: 1rem 0 0.55rem;
             text-transform: uppercase;
         }
 
         .result-card {
             background: var(--card);
             border: 1px solid var(--line);
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            min-height: 148px;
-            padding: 1.05rem 1.1rem;
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            height: 100%;
+            min-height: 168px;
+            padding: 1.15rem 1.2rem;
+            transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .result-card:hover {
+            background: var(--card-hover);
+            border-color: var(--line-strong);
+            transform: translateY(-1px);
         }
 
         .result-card h3 {
-            color: var(--accent);
-            font-size: 1rem;
+            color: var(--ink);
+            font-size: 0.92rem;
+            font-weight: 760;
             letter-spacing: 0 !important;
             margin: 0 0 0.55rem;
         }
 
         .result-card p {
-            color: var(--ink);
+            color: var(--soft);
             font-size: 0.98rem;
-            line-height: 1.5;
+            line-height: 1.58;
             margin: 0;
             white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .results-grid {
+            align-items: stretch;
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin-top: 0.15rem;
+            width: 100%;
+        }
+
+        .results-grid .result-card {
+            min-width: 0;
         }
 
         .share-card {
-            background: #0e0c0b;
-            border: 1px solid var(--line);
-            border-radius: 8px;
+            background: linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%);
+            border: 1px solid rgba(0, 112, 243, 0.22);
+            border-radius: 14px;
             color: var(--ink);
-            padding: 1rem 1.15rem;
-            margin-top: 0.4rem;
+            padding: 1.15rem 1.2rem;
+            margin-top: 1rem;
+            box-shadow: var(--shadow);
         }
 
         .share-card h3 {
@@ -617,17 +777,79 @@ def inject_styles() -> None:
             line-height: 1.5;
             margin: 0;
             white-space: pre-wrap;
+            overflow-wrap: anywhere;
         }
 
         .mode-note {
+            background: var(--surface);
+            border: 1px solid var(--line);
             border-left: 3px solid var(--accent);
-            color: var(--muted);
-            margin: 0.5rem 0 1rem;
-            padding-left: 0.8rem;
+            border-radius: 12px;
+            color: var(--soft);
+            margin: 0.65rem 0 1.15rem;
+            padding: 0.85rem 0.95rem;
+            box-shadow: 0 10px 30px rgba(24, 24, 27, 0.04);
+            text-wrap: pretty;
+        }
+
+        .model-status {
+            align-items: center;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--soft);
+            display: inline-flex;
+            font-size: 0.82rem;
+            font-weight: 650;
+            gap: 0.45rem;
+            margin: 0.1rem 0 0.9rem;
+            padding: 0.32rem 0.62rem;
+        }
+
+        .model-status::before {
+            border-radius: 999px;
+            content: "";
+            display: inline-block;
+            height: 0.48rem;
+            width: 0.48rem;
+        }
+
+        .model-status.live {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .model-status.live::before {
+            background: #3fb950;
+        }
+
+        .model-status.fallback {
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+
+        .model-status.fallback::before {
+            background: var(--warm);
         }
 
         label, .stSelectbox label, .stTextInput label, .stTextArea label {
             color: var(--muted) !important;
+        }
+
+        div[data-testid="column"] {
+            min-width: 0;
+        }
+
+        * {
+            scrollbar-color: var(--line-strong) var(--surface);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+            }
         }
 
         @media (max-width: 640px) {
@@ -642,6 +864,10 @@ def inject_styles() -> None:
             .result-card {
                 min-height: auto;
             }
+
+            .results-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
         </style>
         """,
@@ -649,27 +875,38 @@ def inject_styles() -> None:
     )
 
 
-def render_card(title: str, body: str) -> None:
-    st.markdown(
-        f"""
+def card_html(title: str, body: str) -> str:
+    safe_body = body.strip() or "No content returned."
+    return f"""
         <div class="result-card">
             <h3>{escape(title)}</h3>
-            <p>{escape(body)}</p>
+            <p>{escape(safe_body)}</p>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    """
+
+
+def render_card(title: str, body: str) -> None:
+    st.markdown(card_html(title, body), unsafe_allow_html=True)
 
 
 def render_results(fields: FieldList, response: Dict[str, str], share_key: str = "") -> None:
     if "model_status" in st.session_state:
-        st.caption(st.session_state.model_status)
+        status = st.session_state.model_status
+        status_kind = "live" if status.startswith("Using live model") else "fallback"
+        st.markdown(
+            f'<div class="model-status {status_kind}">{escape(status)}</div>',
+            unsafe_allow_html=True,
+        )
 
-    for row in range(0, len(fields), 2):
-        cols = st.columns(2)
-        for col, (key, title) in zip(cols, fields[row : row + 2]):
-            with col:
-                render_card(title, response.get(key, ""))
+    cards = "\n".join(card_html(title, response.get(key, "")) for key, title in fields)
+    st.markdown(
+        f"""
+        <div class="results-grid">
+            {cards}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     if share_key and response.get(share_key):
         st.markdown(
@@ -746,14 +983,14 @@ def translator_mode() -> None:
             "Cultural phrase or concept",
             key="concept",
             height=150,
-            placeholder="Example: Why Nepali parents ask \"khana khayau?\" instead of saying \"I love you\"",
+            placeholder="Example: Why Nepali parents ask \"khana khayau?\" instead of saying \"I love you\"…",
         )
     with right:
         background, audience, tone = common_context("translator_")
 
-    if st.button("Translate the context", type="primary", use_container_width=True):
+    if st.button("Translate Context", type="primary", use_container_width=True):
         final_concept = clean_concept(concept)
-        with st.spinner("Translating the context..."):
+        with st.spinner("Translating context…"):
             response = build_translator_response(final_concept, background, audience, tone)
         st.session_state.translator_response = response
         st.session_state.translator_title = final_concept
@@ -768,7 +1005,7 @@ def copilot_mode() -> None:
     left, right = st.columns([1.05, 0.95], gap="large")
     with left:
         task = st.selectbox(
-            "What are you making?",
+            "Message Type",
             [
                 "Slack or Teams message",
                 "Email",
@@ -781,13 +1018,14 @@ def copilot_mode() -> None:
         context = st.text_area(
             "What cultural meaning do you need to communicate?",
             value="I want to explain why Dashain matters to me when I ask for time off.",
+            placeholder="Example: I want to explain why Dashain matters to me when I ask for time off…",
             height=160,
         )
     with right:
         background, audience, tone = common_context("copilot_")
 
-    if st.button("Draft the message", type="primary", use_container_width=True):
-        with st.spinner("Writing versions..."):
+    if st.button("Draft Message", type="primary", use_container_width=True):
+        with st.spinner("Writing versions…"):
             response = build_copilot_response(task, context, background, audience, tone)
         st.session_state.copilot_response = response
         add_to_archive("Cultural Copilot", task, response)
@@ -804,13 +1042,14 @@ def misunderstanding_mode() -> None:
         misunderstanding = st.text_area(
             "What did they misunderstand?",
             value="My coworker thought auntie culture just meant gossip.",
+            placeholder="Example: My coworker thought auntie culture just meant gossip…",
             height=140,
         )
     with right:
         background = st.text_input("My background", value="South Asian", key="mis_background")
         audience = st.text_input("Who misunderstood it?", value="Coworker", key="mis_audience")
         desired_outcome = st.selectbox(
-            "What do you want?",
+            "Desired Outcome",
             [
                 "Correct them kindly",
                 "Explain without making it awkward",
@@ -819,8 +1058,8 @@ def misunderstanding_mode() -> None:
             ],
         )
 
-    if st.button("Repair the misunderstanding", type="primary", use_container_width=True):
-        with st.spinner("Building a repair response..."):
+    if st.button("Repair Misunderstanding", type="primary", use_container_width=True):
+        with st.spinner("Building repair response…"):
             response = build_misunderstanding_response(
                 concept, misunderstanding, background, audience, desired_outcome
             )
@@ -838,22 +1077,25 @@ def family_mode() -> None:
         situation = st.text_area(
             "Family situation",
             value="My mom keeps asking if I ate. I know she cares, but sometimes it feels like pressure.",
+            placeholder="Example: My mom keeps asking if I ate, and I know she cares, but it feels like pressure…",
             height=145,
         )
         older_side = st.text_area(
             "Older generation or first person's side",
             value="She is trying to show care through food and checking in.",
+            placeholder="Example: She is trying to show care through food and checking in…",
             height=110,
         )
     with right:
         younger_side = st.text_area(
             "Younger generation or second person's side",
             value="I want to feel trusted and not monitored.",
+            placeholder="Example: I want to feel trusted and not monitored…",
             height=110,
         )
         background = st.text_input("Family background", value="Nepali / South Asian", key="family_background")
         goal = st.selectbox(
-            "Conversation goal",
+            "Conversation Goal",
             [
                 "Explain both sides",
                 "Respond kindly",
@@ -862,8 +1104,8 @@ def family_mode() -> None:
             ],
         )
 
-    if st.button("Translate the family meaning", type="primary", use_container_width=True):
-        with st.spinner("Translating both sides..."):
+    if st.button("Translate Family Meaning", type="primary", use_container_width=True):
+        with st.spinner("Translating both sides…"):
             response = build_family_response(situation, older_side, younger_side, background, goal)
         st.session_state.family_response = response
         add_to_archive("Family Translator", "Family translation", response)
@@ -880,14 +1122,15 @@ def compare_mode() -> None:
         target_familiarity = st.text_area(
             "What might the target audience already understand?",
             value="They understand Thanksgiving, Christmas family gatherings, and receiving blessings at major life events.",
+            placeholder="Example: They understand Thanksgiving, Christmas family gatherings, and receiving blessings…",
             height=135,
         )
     with right:
         source_culture = st.text_input("Source culture", value="Nepali")
         target_culture = st.text_input("Target culture", value="American")
 
-    if st.button("Compare the cultures", type="primary", use_container_width=True):
-        with st.spinner("Finding bridges and differences..."):
+    if st.button("Compare Cultures", type="primary", use_container_width=True):
+        with st.spinner("Finding bridges and differences…"):
             response = build_compare_response(concept, source_culture, target_culture, target_familiarity)
         st.session_state.compare_response = response
         add_to_archive("Compare Cultures", concept, response)
@@ -907,18 +1150,20 @@ def archive_mode() -> None:
         memory = st.text_area(
             "Memory, ritual, saying, food, or tradition",
             value="My parents ask if I ate whenever they call, even when they do not say emotional things directly.",
+            placeholder="Example: My parents ask if I ate whenever they call…",
             height=145,
         )
     with right:
         meaning = st.text_area(
             "Meaning you want preserved",
             value="It is a way of checking if I am okay and showing care through food.",
+            placeholder="Example: It is a way of checking if I am okay and showing care through food…",
             height=110,
         )
         background = st.text_input("Family or cultural background", value="Nepali / South Asian")
 
-    if st.button("Create archive entry", type="primary", use_container_width=True):
-        with st.spinner("Preserving the memory..."):
+    if st.button("Create Archive Entry", type="primary", use_container_width=True):
+        with st.spinner("Preserving memory…"):
             response = build_archive_response(title, memory, meaning, background)
         st.session_state.archive_response = response
         add_to_archive("Personal Archive", response.get("archive_title", title), response)
@@ -963,33 +1208,47 @@ def main() -> None:
     )
     inject_styles()
 
+    st.markdown('<a class="skip-link" href="#main-content">Skip to Main Content</a>', unsafe_allow_html=True)
+    st.markdown('<main id="main-content">', unsafe_allow_html=True)
     st.title(APP_TITLE)
     st.markdown(f'<div class="tagline">{TAGLINE}</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="intro">A cultural communication assistant for explaining meaning, repairing misunderstandings, comparing contexts, and preserving family memory.</div>',
         unsafe_allow_html=True,
     )
-
-    mode = st.radio(
-        "Mode",
-        list(MODE_INTROS.keys()),
-        horizontal=True,
-        label_visibility="collapsed",
+    st.markdown(
+        """
+        <div class="hero-strip">
+            <span class="hero-pill"><strong>6</strong> communication modes</span>
+            <span class="hero-pill">Live model with fallback</span>
+            <span class="hero-pill">Session archive export</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
-    render_mode_note(mode)
 
-    if mode == "Context Translator":
+    mode_names = list(MODE_INTROS.keys())
+    tabs = st.tabs(mode_names)
+
+    with tabs[0]:
+        render_mode_note("Context Translator")
         translator_mode()
-    elif mode == "Cultural Copilot":
+    with tabs[1]:
+        render_mode_note("Cultural Copilot")
         copilot_mode()
-    elif mode == "Misunderstanding Resolver":
+    with tabs[2]:
+        render_mode_note("Misunderstanding Resolver")
         misunderstanding_mode()
-    elif mode == "Family Translator":
+    with tabs[3]:
+        render_mode_note("Family Translator")
         family_mode()
-    elif mode == "Compare Cultures":
+    with tabs[4]:
+        render_mode_note("Compare Cultures")
         compare_mode()
-    elif mode == "Personal Archive":
+    with tabs[5]:
+        render_mode_note("Personal Archive")
         archive_mode()
+    st.markdown("</main>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
