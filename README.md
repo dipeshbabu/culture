@@ -4,19 +4,22 @@ Culture Remix Translator is a Streamlit app for explaining cultural phrases, tra
 
 Tagline: Most translation apps translate words. This translates context.
 
-The app has six modes:
+The app has seven modes:
 
 - Context Translator: explains literal meaning, cultural meaning, misunderstandings, analogies, and a say-it-out-loud version.
 - Cultural Copilot: drafts messages, emails, captions, speeches, and workplace notes that keep the cultural feeling intact.
-- Misunderstanding Resolver: helps repair moments where someone misunderstood a cultural practice or phrase.
+- Misunderstanding Resolver: helps repair moments where someone misunderstood a cultural practice or phrase, including boundary language, follow-up questions, and a shareable culture card.
 - Family Translator: translates between generations, especially immigrant parents, elders, first-gen kids, and family members.
 - Compare Cultures: explains one cultural concept through another culture's familiar reference points.
+- Culture Card Studio: turns a cultural phrase, ritual, food, or family habit into a concise shareable caption/card with nuance intact.
 - Personal Archive: turns family sayings, rituals, food memories, and traditions into saved archive entries.
 
 Recent product polish:
 
 - Mode-specific quick starts for demo-ready examples.
 - Copy-ready panels for the most useful generated text.
+- Culture Card Studio for shareable social captions, slides, and group-chat explanations.
+- Expanded misunderstanding repair with respectful replies, boundary versions, and shareable cards.
 - Local archive persistence in `culture-remix-archive.local.json`.
 - One retry for malformed live-model JSON before falling back.
 
@@ -52,5 +55,6 @@ When these values are present, the app calls Claude Opus through Portkey. If the
 4. Confirm the tone is `First-gen kid explaining it to coworkers`.
 5. Click `Translate Context`.
 6. Point out the literal meaning, deeper cultural meaning, misunderstanding, modern analogy, and say-it-out-loud version.
-7. Switch to Cultural Copilot or Family Translator to show that the app goes beyond definition and helps with real communication.
-8. End with: "The point is not to make culture simpler. It is to make it easier to share without losing the feeling."
+7. Switch to Misunderstanding Resolver to show how the app repairs a real awkward moment.
+8. Switch to Culture Card Studio and create a shareable card for the same phrase.
+9. End with: "The point is not to make culture simpler. It is to make it easier to share without losing the feeling."

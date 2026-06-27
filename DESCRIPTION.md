@@ -20,6 +20,8 @@ Culture Remix Translator is a Streamlit app that turns culturally specific conce
 - **Say it out loud** — a short script someone can actually use in conversation
 - **Nuance note** — regional variation, sensitivity, and what not to oversimplify
 
+The expanded version also works as a cultural communication coach. It can help repair misunderstandings, write boundary-aware replies, create follow-up questions, and turn cultural context into shareable cards for captions, slides, or group chats.
+
 The goal is not to flatten culture into something simpler. It is to make culture easier to share without losing the feeling.
 
 ## How it works
@@ -28,6 +30,8 @@ The goal is not to flatten culture into something simpler. It is to make culture
 2. Set your background, target audience (e.g. American coworkers), and tone (e.g. first-gen kid explaining to coworkers).
 3. Click **Translate the context** to generate a structured explanation.
 4. Use the **Shareable explanation** card as a ready-to-say summary.
+5. Use **Misunderstanding Resolver** when someone misreads the concept.
+6. Use **Culture Card Studio** to turn the idea into a concise shareable caption/card.
 
 Built-in demo examples include "khana khayau?", Dashain tika, auntie culture, and namaste outside a yoga-studio context.
 
@@ -50,7 +54,9 @@ Immigrant and first-generation communities constantly translate context for othe
 3. Set target audience to **American coworkers** and tone to **First-gen kid explaining it to coworkers**.
 4. Click **Translate the context**.
 5. Walk through literal vs. cultural meaning, the misunderstanding, and the say-it-out-loud version.
-6. Close with: "The point is not to make culture simpler. It is to make it easier to share without losing the feeling."
+6. Switch to **Misunderstanding Resolver** and show the respectful reply plus boundary version.
+7. Switch to **Culture Card Studio** and generate a shareable caption/card.
+8. Close with: "The point is not to make culture simpler. It is to make it easier to share without losing the feeling."
 
 ## Run locally
 

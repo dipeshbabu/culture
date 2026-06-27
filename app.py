@@ -41,9 +41,13 @@ COPILOT_FIELDS: FieldList = [
 ]
 
 MISUNDERSTANDING_FIELDS: FieldList = [
+    ("situation_read", "What happened"),
     ("what_they_missed", "What they missed"),
+    ("deeper_context", "Deeper context"),
     ("respectful_reply", "Respectful reply"),
-    ("shorter_reply", "Shorter reply"),
+    ("boundary_reply", "Boundary version"),
+    ("follow_up_question", "Follow-up question"),
+    ("shareable_culture_card", "Shareable culture card"),
     ("repair_strategy", "Repair strategy"),
     ("what_not_to_say", "What not to say"),
     ("sensitivity_note", "Nuance note"),
@@ -73,6 +77,16 @@ ARCHIVE_FIELDS: FieldList = [
     ("meaning_underneath", "Meaning underneath"),
     ("how_to_explain_it", "How to explain it"),
     ("preservation_note", "Preservation note"),
+]
+
+SHARE_CARD_FIELDS: FieldList = [
+    ("card_title", "Card title"),
+    ("one_line_context", "One-line context"),
+    ("what_it_really_means", "What it really means"),
+    ("why_people_misread_it", "Why people misread it"),
+    ("ready_to_share_caption", "Ready-to-share caption"),
+    ("alt_text", "Alt text"),
+    ("sensitivity_note", "Nuance note"),
 ]
 
 EXAMPLES = [
@@ -148,6 +162,7 @@ MISUNDERSTANDING_PRESETS = [
         "background": "South Asian",
         "audience": "Coworker",
         "outcome": "Correct them kindly",
+        "channel": "Work conversation",
     },
     {
         "label": "Namaste Yoga",
@@ -156,6 +171,7 @@ MISUNDERSTANDING_PRESETS = [
         "background": "Nepali / Indian",
         "audience": "Friend",
         "outcome": "Explain without making it awkward",
+        "channel": "Text message",
     },
     {
         "label": "Food Pressure",
@@ -164,6 +180,7 @@ MISUNDERSTANDING_PRESETS = [
         "background": "Nepali / South Asian",
         "audience": "Partner",
         "outcome": "Explain without making it awkward",
+        "channel": "In-person conversation",
     },
 ]
 
@@ -242,6 +259,45 @@ ARCHIVE_PRESETS = [
     },
 ]
 
+SHARE_CARD_PRESETS = [
+    {
+        "label": "Did You Eat?",
+        "concept": "Khana khayau?",
+        "meaning": "In many Nepali and South Asian families, asking if someone ate can be a practical way to say I care about you.",
+        "background": "Nepali / South Asian",
+        "audience": "Friends who did not grow up with this",
+        "platform": "Instagram carousel",
+        "style": "Warm and personal",
+    },
+    {
+        "label": "Dashain Tika",
+        "concept": "Dashain tika",
+        "meaning": "Receiving tika and jamara from elders can carry blessing, family memory, respect, and belonging.",
+        "background": "Nepali",
+        "audience": "American friends",
+        "platform": "Instagram caption",
+        "style": "Thoughtful explainer",
+    },
+    {
+        "label": "Auntie Culture",
+        "concept": "Auntie culture",
+        "meaning": "Aunties can be community elders, family friends, care networks, social accountability, and affectionate surveillance all at once.",
+        "background": "South Asian",
+        "audience": "College friends",
+        "platform": "TikTok caption",
+        "style": "Funny but respectful",
+    },
+    {
+        "label": "Namaste",
+        "concept": "Namaste",
+        "meaning": "Namaste can be an everyday respectful greeting, not only a yoga-studio phrase or wellness aesthetic.",
+        "background": "Nepali / Indian",
+        "audience": "Western wellness audience",
+        "platform": "LinkedIn post",
+        "style": "Clear and grounded",
+    },
+]
+
 BASE_SYSTEM_PROMPT = """You are Culture Remix Translator, a cultural communication assistant.
 
 Your job is not only to translate words. Your job is to translate context, emotion, social meaning, family meaning, and common misunderstandings.
@@ -253,9 +309,10 @@ Return valid JSON only. Do not include markdown, comments, or any text outside t
 MODE_INTROS = {
     "Context Translator": "Explain a phrase, tradition, food, slang term, or family habit through cultural context.",
     "Cultural Copilot": "Turn cultural meaning into a message, caption, email, speech, or workplace explanation.",
-    "Misunderstanding Resolver": "Repair a moment where someone misunderstood a cultural phrase, practice, or habit.",
+    "Misunderstanding Resolver": "Repair a moment where someone misunderstood a cultural phrase, practice, or habit, then turn it into a usable response.",
     "Family Translator": "Translate between generations, especially immigrant parents, elders, first-gen kids, and family members.",
     "Compare Cultures": "Explain one cultural concept through another culture's familiar reference points.",
+    "Culture Card Studio": "Turn a cultural phrase, ritual, or family habit into a shareable post or caption with nuance intact.",
     "Personal Archive": "Save family sayings, rituals, food memories, and traditions as a living cultural archive.",
 }
 
@@ -502,14 +559,27 @@ def fallback_copilot(task: str, context: str, audience: str, tone: str) -> Dict[
     }
 
 
-def fallback_misunderstanding(concept: str, misunderstanding: str, audience: str) -> Dict[str, str]:
+def fallback_misunderstanding(
+    concept: str,
+    misunderstanding: str,
+    audience: str,
+    desired_outcome: str,
+    channel: str,
+) -> Dict[str, str]:
     subject = concept.strip() or "this cultural practice"
     missed = misunderstanding.strip() or "they focused only on the literal meaning"
+    audience_text = audience.strip() or "the other person"
+    outcome_text = desired_outcome.strip() or "explain without making it awkward"
+    channel_text = channel.strip() or "conversation"
     return {
+        "situation_read": f"{audience_text} is reading {subject} through the most obvious surface meaning: {missed}",
         "what_they_missed": f"They may have missed that {subject} can carry emotional or social meaning beyond the surface action. The misunderstanding was: {missed}.",
+        "deeper_context": f"In many families or communities, {subject} works like a social shortcut. The action is visible, but the real message may be care, respect, belonging, accountability, memory, or relationship.",
         "respectful_reply": f"I get why it might look that way from the outside. For me, {subject} is not only about the literal action. It can also be about care, respect, belonging, or family memory.",
-        "shorter_reply": f"It is less about the literal act and more about the meaning behind it.",
-        "repair_strategy": "Start by validating why it may seem confusing, then explain the feeling underneath, then give a simple example from lived experience.",
+        "boundary_reply": f"I am happy to explain it, but I do not want it reduced to a joke or stereotype. The short version is that {subject} carries more context than it may seem to at first.",
+        "follow_up_question": f"Could I explain what it means in my family before we decide what to call it?",
+        "shareable_culture_card": f"{subject}: it may look like one small habit from the outside, but for many people it can carry care, memory, respect, and belonging. The context is the translation.",
+        "repair_strategy": f"For a {channel_text}, start with a small validation, name the missing context, give one lived example, then choose language that helps you {outcome_text.lower()}.",
         "what_not_to_say": "Avoid making the other person feel ignorant or saying that everyone from the culture sees it the same way.",
         "sensitivity_note": "A good repair leaves room for variation. Say what it means in your family or community rather than claiming one universal meaning.",
     }
@@ -554,6 +624,33 @@ def fallback_archive(title: str, memory: str, meaning: str) -> Dict[str, str]:
     }
 
 
+def fallback_share_card(
+    concept: str,
+    meaning: str,
+    background: str,
+    audience: str,
+    platform: str,
+    style: str,
+) -> Dict[str, str]:
+    subject = concept.strip() or "This cultural moment"
+    meaning_text = meaning.strip() or "It carries more feeling, relationship, and context than the literal action shows."
+    if meaning_text[-1] not in ".!?":
+        meaning_text = f"{meaning_text}."
+    background_text = background.strip() or "my background"
+    audience_text = audience.strip() or "people outside the culture"
+    platform_text = platform.strip() or "social post"
+    style_text = style.strip() or "warm and clear"
+    return {
+        "card_title": subject,
+        "one_line_context": f"A {style_text.lower()} explanation of {subject} from {background_text} for {audience_text}.",
+        "what_it_really_means": meaning_text,
+        "why_people_misread_it": "People often read the visible action first and miss the relationship, memory, humor, respect, or care underneath it.",
+        "ready_to_share_caption": f"{subject} is hard to translate directly because the meaning is not only in the words or ritual. {meaning_text} That context is what I want people to understand.",
+        "alt_text": f"Share card titled {subject}, explaining the cultural context behind the phrase or practice for {platform_text}.",
+        "sensitivity_note": "Frame this as one lived explanation, not a universal rule. Culture changes by family, region, generation, religion, class, and personal experience.",
+    }
+
+
 def build_translator_response(concept: str, background: str, audience: str, tone: str) -> Dict[str, str]:
     prompt = f"""Cultural phrase or concept: {concept}
 User background: {background}
@@ -591,19 +688,25 @@ def build_misunderstanding_response(
     background: str,
     audience: str,
     desired_outcome: str,
+    channel: str,
 ) -> Dict[str, str]:
     prompt = f"""Cultural concept: {concept}
 User background: {background}
 Who misunderstood it: {audience}
 What happened or what they said: {misunderstanding}
 Desired outcome: {desired_outcome}
+Where the reply will be used: {channel}
 
-Help the user repair the misunderstanding respectfully and clearly."""
+Help the user repair the misunderstanding respectfully and clearly.
+
+Include a shareable culture card that can stand alone as a concise caption or post.
+The boundary reply should be firm without sounding hostile.
+The follow-up question should invite understanding without forcing the user to over-explain."""
     return call_structured_model(
         "Misunderstanding Resolver",
         MISUNDERSTANDING_FIELDS,
         prompt,
-        fallback_misunderstanding(concept, misunderstanding, audience),
+        fallback_misunderstanding(concept, misunderstanding, audience, desired_outcome, channel),
     )
 
 
@@ -661,6 +764,32 @@ Turn this into a concise cultural archive entry that preserves feeling, context,
         ARCHIVE_FIELDS,
         prompt,
         fallback_archive(title, memory, meaning),
+    )
+
+
+def build_share_card_response(
+    concept: str,
+    meaning: str,
+    background: str,
+    audience: str,
+    platform: str,
+    style: str,
+) -> Dict[str, str]:
+    prompt = f"""Cultural phrase, ritual, food, habit, or family saying: {concept}
+Cultural or family background: {background}
+Meaning to preserve: {meaning}
+Target audience: {audience}
+Share format or platform: {platform}
+Style: {style}
+
+Create a shareable culture card. It should be concise, emotionally specific, respectful, and easy to copy into a social caption, carousel, presentation slide, or group chat.
+
+Do not turn the culture into a stereotype. Do not overclaim that everyone from the culture experiences it the same way."""
+    return call_structured_model(
+        "Culture Card Studio",
+        SHARE_CARD_FIELDS,
+        prompt,
+        fallback_share_card(concept, meaning, background, audience, platform, style),
     )
 
 
@@ -1177,6 +1306,8 @@ def archive_entry_preview(item: Dict[str, object]) -> Tuple[str, str]:
     mode = str(item.get("mode") or "Archive")
     body = (
         response.get("how_to_explain_it")
+        or response.get("ready_to_share_caption")
+        or response.get("shareable_culture_card")
         or response.get("say_it_out_loud")
         or response.get("best_version")
         or next((str(value) for value in response.values() if value), "")
@@ -1337,6 +1468,7 @@ def misunderstanding_mode() -> None:
             "mis_background": "South Asian",
             "mis_audience": "Coworker",
             "mis_outcome": "Correct them kindly",
+            "mis_channel": "Work conversation",
         }
     )
     render_preset_buttons(
@@ -1348,6 +1480,7 @@ def misunderstanding_mode() -> None:
             "background": "mis_background",
             "audience": "mis_audience",
             "outcome": "mis_outcome",
+            "channel": "mis_channel",
         },
     )
     left, right = st.columns([1.05, 0.95], gap="large")
@@ -1372,18 +1505,34 @@ def misunderstanding_mode() -> None:
             ],
             key="mis_outcome",
         )
+        channel = st.selectbox(
+            "Where will you use this?",
+            [
+                "Work conversation",
+                "Text message",
+                "In-person conversation",
+                "Family group chat",
+                "Social post",
+                "Classroom discussion",
+            ],
+            key="mis_channel",
+        )
 
     if st.button("Repair Misunderstanding", type="primary", use_container_width=True):
         with st.spinner("Building repair response..."):
             response = build_misunderstanding_response(
-                concept, misunderstanding, background, audience, desired_outcome
+                concept, misunderstanding, background, audience, desired_outcome, channel
             )
         st.session_state.misunderstanding_response = response
         add_to_archive("Misunderstanding Resolver", concept, response)
 
     if "misunderstanding_response" in st.session_state:
         st.markdown('<div class="section-kicker">Misunderstanding repair</div>', unsafe_allow_html=True)
-        render_results(MISUNDERSTANDING_FIELDS, st.session_state.misunderstanding_response, "respectful_reply")
+        render_results(
+            MISUNDERSTANDING_FIELDS,
+            st.session_state.misunderstanding_response,
+            "shareable_culture_card",
+        )
 
 
 def family_mode() -> None:
@@ -1494,6 +1643,77 @@ def compare_mode() -> None:
         render_results(COMPARE_FIELDS, st.session_state.compare_response, "explanation_for_target")
 
 
+def share_card_mode() -> None:
+    set_defaults(
+        {
+            "share_concept": "Khana khayau?",
+            "share_meaning": "In many Nepali and South Asian families, asking if someone ate can be a practical way to say I care about you.",
+            "share_background": "Nepali / South Asian",
+            "share_audience": "Friends who did not grow up with this",
+            "share_platform": "Instagram carousel",
+            "share_style": "Warm and personal",
+        }
+    )
+    render_preset_buttons(
+        SHARE_CARD_PRESETS,
+        "share",
+        {
+            "concept": "share_concept",
+            "meaning": "share_meaning",
+            "background": "share_background",
+            "audience": "share_audience",
+            "platform": "share_platform",
+            "style": "share_style",
+        },
+    )
+    left, right = st.columns([1.05, 0.95], gap="large")
+    with left:
+        concept = st.text_input("Cultural phrase, ritual, food, or habit", key="share_concept")
+        meaning = st.text_area(
+            "What meaning should the card preserve?",
+            placeholder="Example: It is a way of checking if I am okay and showing care through food...",
+            height=150,
+            key="share_meaning",
+        )
+    with right:
+        background = st.text_input("My background", key="share_background")
+        audience = st.text_input("Target audience", key="share_audience")
+        platform = st.selectbox(
+            "Share format",
+            [
+                "Instagram carousel",
+                "Instagram caption",
+                "TikTok caption",
+                "LinkedIn post",
+                "Presentation slide",
+                "Family group chat",
+            ],
+            key="share_platform",
+        )
+        style = st.selectbox(
+            "Style",
+            [
+                "Warm and personal",
+                "Thoughtful explainer",
+                "Funny but respectful",
+                "Clear and grounded",
+                "First-gen voice",
+                "Professional but human",
+            ],
+            key="share_style",
+        )
+
+    if st.button("Create Share Card", type="primary", use_container_width=True):
+        with st.spinner("Creating shareable culture card..."):
+            response = build_share_card_response(concept, meaning, background, audience, platform, style)
+        st.session_state.share_card_response = response
+        add_to_archive("Culture Card Studio", response.get("card_title", concept), response)
+
+    if "share_card_response" in st.session_state:
+        st.markdown('<div class="section-kicker">Shareable culture card</div>', unsafe_allow_html=True)
+        render_results(SHARE_CARD_FIELDS, st.session_state.share_card_response, "ready_to_share_caption")
+
+
 def archive_mode() -> None:
     ensure_archive_loaded()
     set_defaults(
@@ -1583,13 +1803,13 @@ def main() -> None:
     st.title(APP_TITLE)
     st.markdown(f'<div class="tagline">{TAGLINE}</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="intro">A cultural communication assistant for explaining meaning, repairing misunderstandings, comparing contexts, and preserving family memory.</div>',
+        '<div class="intro">A cultural communication assistant for explaining meaning, repairing misunderstandings, creating shareable culture cards, comparing contexts, and preserving family memory.</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
         """
         <div class="hero-strip">
-            <span class="hero-pill"><strong>6</strong> communication modes</span>
+            <span class="hero-pill"><strong>7</strong> communication modes</span>
             <span class="hero-pill">Live model with fallback</span>
             <span class="hero-pill">Session archive export</span>
         </div>
@@ -1616,6 +1836,9 @@ def main() -> None:
         render_mode_note("Compare Cultures")
         compare_mode()
     with tabs[5]:
+        render_mode_note("Culture Card Studio")
+        share_card_mode()
+    with tabs[6]:
         render_mode_note("Personal Archive")
         archive_mode()
     st.markdown("</main>", unsafe_allow_html=True)
